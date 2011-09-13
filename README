@@ -1,0 +1,13 @@
+This started as a random discussion on facebook. We were goofing around with the idea of creating an application for 
+our weekly/monthly reckoning.
+The reason behind this was the time consuming calculation of weekly expenses by us on our flat mates and then settling 
+the account. This was a really troublesome. 
+
+So the idea is to create a tool which will keep a track all the expenditure of your group.
+1. We can create groups among which the expenses will be shared.
+2. Each group would have some n number of members.
+3. The members can log into his/her account and feed in the details of his or her expenditure: the amount, the beneficiaries of the expenditure, and the items on which amount was spent.
+4. As soon as any member makes an entry the other members will get the alert for the same.
+5. The member can also keep a track of his financial standing among the members.
+6. The user can generate graphs for a better visualisation.
+7. In addition to a web based application we can also have a mobile app.
