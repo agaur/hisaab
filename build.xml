@@ -1,0 +1,142 @@
+<project name="hisaab" default="dist" xmlns:ac="antlib:net.sf.antcontrib"
+	xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+
+	<property name="app.name" value="hisaab" />
+	<property name="app.war" value="${app.name}.war" />
+	<property name="app.jar" value="${app.name}.jar" />
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="java.src.dir" value="${src.dir}/main/java" />
+	<property name="js.src.dir" value="${src.dir}/main/js" />
+	<property name="staging.dir" value="${basedir}/staging" />
+	<property name="docs.dir" value="${staging.dir}/docs" />
+	<property name="js.docs.dir" value="${docs.dir}/js" />
+
+	<property name="classes.dir" value="${staging.dir}/classes" />
+	<property name="app.dir" value="${staging.dir}/${app.name}" />
+
+	<!-- Test Properties -->
+
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml"
+		classpath=" ${src.dir}/tools/ant-contrib.jar" />
+
+	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml"
+		classpath="${src.dir}/tools/jslint4java.jar" />
+
+	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"
+		classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
+
+
+	<target name="init">
+		<mkdir dir="${staging.dir}" />
+		<mkdir dir="${app.dir}" />
+	</target>
+
+	<!-- compile -->
+	<target name="compile" depends="init">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}"
+			classpathref="compile.class.path" nowarn="yes" debug="yes"
+			includeantruntime="false">
+			<!-- <compiler arg value="-Xlint:unchecked"/> -->
+		</javac>
+	</target>
+
+	<!-- compile test -->
+
+
+	<!-- jar -->
+	<target name="jar">
+		<jar jarfile="${staging.dir}/${app.jar}">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+
+	<!-- war staging -->
+	<target name="war-staging">
+		<echo>${app.dir}</echo>
+		<copy toDir="${app.dir}">
+			<fileset dir="${src.dir}/webapp">
+				<exclude name="web.xml" />
+			</fileset>
+		</copy>
+		<mkdir dir="${app.dir}/js" />
+		<copy toDir="${app.dir}/js">
+			<fileset dir="${js.src.dir}">
+			</fileset>
+		</copy>
+		<mkdir dir="${app.dir}/WEB-INF" />
+		<mkdir dir="${app.dir}/WEB-INF/lib" />
+
+
+		<copy toDir="${app.dir}/WEB-INF/lib">
+			<fileset dir="${staging.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<copy toDir="${app.dir}/WEB-INF">
+			<fileset dir="${src.dir}/webapp">
+				<include name="web.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- make war -->
+	<target name="war" depends="war-staging">
+		<war warfile="${staging.dir}/${app.war}" needxmlfile="false">
+			<fileset dir="${app.dir}">
+			</fileset>
+		</war>
+	</target>
+
+
+	<!-- deploy -->
+	<target name="deploy" depends="war">
+		<copy toDir="E:\tomcat\webapps">
+			<fileset dir="${staging.dir}">
+				<include name="*.war" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- docs -->
+	<target name="jsdoc">
+		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/"
+			includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}"
+			inputdir="${js.src.dir}" />
+		<echo> JS Docs generated at ${js.docs.dir} </echo>
+	</target>
+
+
+
+	<target name="jslint">
+		<jsl:jslint haltOnFailure="true"
+			options="es5,evil,fragment,forin,continue">
+			<formatter type="plain" />
+			<fileset dir="${js.src.dir}" includes="*.js">
+				<exclude name="**/*-min.js" />
+				<exclude name="**/jQuery*.js" />
+			</fileset>
+		</jsl:jslint>
+	</target>
+
+
+	<target name="dist" description="Prepares a dist, is not incremental"
+		depends="clean, compile, jar,war,dev,deploy">
+		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server.
+			For detailed instructions please use the README</echo>
+	</target>
+
+	<target name="dev" description="prepares a dev build, is incremental"
+		depends="compile, jar, war-staging">
+		<echo>Building the war in dev-mode</echo>
+	</target>
+
+	<target name="clean" description="Cleans up all the staging resources and log files">
+		<delete dir="${staging.dir}" />
+		<delete dir="${test.reports.dir}" />
+		<delete file="${basedir}/mViewer.log" />
+	</target>
+</project>

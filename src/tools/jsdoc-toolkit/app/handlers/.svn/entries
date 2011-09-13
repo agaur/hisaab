@@ -1,0 +1,55 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/plugin/jsdoc-toolkit/app/handlers
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+XMLDOC.js
+file
+
+
+
+
+2011-07-27T14:12:13.600929Z
+5550cc8974795d81ca0b9ec6580e84fc
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+FOODOC.js
+file
+
+
+
+
+2011-07-27T14:12:13.603929Z
+40267714b025887b01cc9e259088a799
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+XMLDOC
+dir
+

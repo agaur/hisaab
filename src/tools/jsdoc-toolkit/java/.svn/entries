@@ -1,0 +1,58 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/plugin/jsdoc-toolkit/java
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+build_1.4.xml
+file
+
+
+
+
+2011-07-27T14:12:14.264967Z
+38c57499e5e85844ad3ef70d7877ab60
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+src
+dir
+
+classes
+dir
+
+build.xml
+file
+
+
+
+
+2011-07-27T14:12:14.267967Z
+8a2017b419dfd8dba6eb22ba90006833
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
