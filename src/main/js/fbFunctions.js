@@ -1,12 +1,18 @@
-$(document).ready(function(){
-	var url =  window.location.toString();
-	alert(url);
-	var code = url.substring(url.lastIndexOf("code=")+5);
-	$.ajax({
-		  url: "https://graph.facebook.com/oauth/access_token?client_id=108168559291917&redirect_uri=http://localhost:8080/hisaab/home.html&client_secret=68c107b753dbef9404126ce306b0abce&code="+code,
-		  context: document.body,
-		  success: function(resp){
-		   alert(resp);
-		  }
-		});
+$(document).ready(function() {
+	var getUrlVars = function() {
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('#') + 1).split('&');
+		for ( var i = 0; i < hashes.length; i++) {
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;
+	}
+	var getUrlVar = function(name) {
+		return getUrlVars()[name];
+	};
+
+	var accessToken = getUrlVar('access_token');
+	$("#user-picture").html("<img src='https://graph.facebook.com/me/picture?access_token="+accessToken+"'/>");
 });

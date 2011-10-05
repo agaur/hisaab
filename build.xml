@@ -1,7 +1,6 @@
-<project name="hisaab" default="dist" xmlns:ac="antlib:net.sf.antcontrib"
-	xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="hisaab" default="all" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
 
-
+	<property name="basedir" location="." />
 	<property name="app.name" value="hisaab" />
 	<property name="app.war" value="${app.name}.war" />
 	<property name="app.jar" value="${app.name}.jar" />
@@ -11,20 +10,17 @@
 	<property name="staging.dir" value="${basedir}/staging" />
 	<property name="docs.dir" value="${staging.dir}/docs" />
 	<property name="js.docs.dir" value="${docs.dir}/js" />
-
 	<property name="classes.dir" value="${staging.dir}/classes" />
 	<property name="app.dir" value="${staging.dir}/${app.name}" />
+	<property file="${basedir}/hisaab.properties" />
 
 	<!-- Test Properties -->
 
-	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml"
-		classpath=" ${src.dir}/tools/ant-contrib.jar" />
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
 
-	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml"
-		classpath="${src.dir}/tools/jslint4java.jar" />
+	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/tools/jslint4java.jar" />
 
-	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"
-		classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
+	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
 
 
 	<target name="init">
@@ -35,9 +31,7 @@
 	<!-- compile -->
 	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="${java.src.dir}" destdir="${classes.dir}"
-			classpathref="compile.class.path" nowarn="yes" debug="yes"
-			includeantruntime="false">
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes" includeantruntime="false">
 			<!-- <compiler arg value="-Xlint:unchecked"/> -->
 		</javac>
 	</target>
@@ -94,7 +88,7 @@
 
 	<!-- deploy -->
 	<target name="deploy" depends="war">
-		<copy toDir="E:\tomcat\webapps">
+		<copy toDir="D:\server\hisaabServer\webapps">
 			<fileset dir="${staging.dir}">
 				<include name="*.war" />
 			</fileset>
@@ -103,17 +97,14 @@
 
 	<!-- docs -->
 	<target name="jsdoc">
-		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/"
-			includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}"
-			inputdir="${js.src.dir}" />
+		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
 		<echo> JS Docs generated at ${js.docs.dir} </echo>
 	</target>
 
 
 
 	<target name="jslint">
-		<jsl:jslint haltOnFailure="true"
-			options="es5,evil,fragment,forin,continue">
+		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
 			<formatter type="plain" />
 			<fileset dir="${js.src.dir}" includes="*.js">
 				<exclude name="**/*-min.js" />
@@ -123,20 +114,88 @@
 	</target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental"
-		depends="clean, compile, jar,war,dev,deploy">
+	<target name="all" description="Deploys and starts server" depends="clean-staging, dev, deploy, start-server">
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server.
-			For detailed instructions please use the README</echo>
+			and start the server</echo>
 	</target>
 
-	<target name="dev" description="prepares a dev build, is incremental"
-		depends="compile, jar, war-staging">
+	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war">
 		<echo>Building the war in dev-mode</echo>
 	</target>
 
-	<target name="clean" description="Cleans up all the staging resources and log files">
+	<target name="clean-staging" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
 		<delete dir="${test.reports.dir}" />
 		<delete file="${basedir}/mViewer.log" />
+	</target>
+	
+	<target name="clean-tomcat" description="Cleans up all the tomcat">
+		<echo message="Removing the hisaab folder from tomcat" />
+			<delete dir="${TOMCAT_HOME}/webapps/hisaab" />
+		</target>
+	<target name="check-tomcat-ports" description="Check whether Tomcat is running">
+		<echo message="Checking whether Tomcat is running" />
+		<condition property="tomcat.running">
+			<or>
+				<socket server="localhost" port="${TOMCAT_PORT_SECURE}" />
+				<socket server="localhost" port="${TOMCAT_PORT}" />
+			</or>
+		</condition>
+	</target>
+
+	<!-- ================================= 
+	          target: server-prestart to check if tomcat is running
+	         ================================= -->
+	<target name="server-prestart" depends="check-tomcat-ports" description="Prestart task to execute before server starts">
+		<fail message="Cannot start server: Port ${TOMCAT_PORT} or ${TOMCAT_PORT_SECURE} is already in use">
+			<condition>
+				<isset property="tomcat.running" />
+			</condition>
+		</fail>
+	</target>
+	<!-- ================================= 
+          target: start-server to start tomcat
+         ================================= -->
+	<target name="start-server" depends="server-prestart">
+		<echo>-----------------------------------------------------</echo>
+		<echo>Starting Tomcat</echo>
+		<echo>-----------------------------------------------------</echo>
+		<java classname="org.apache.catalina.startup.Bootstrap" failonerror="true" fork="true">
+			<classpath path="${TOMCAT_HOME}/bin/bootstrap.jar:${TOMCAT_HOME}/bin/tomcat-juli.jar" />
+			<jvmarg value="-Dcatalina.home=${TOMCAT_HOME}" />
+			<jvmarg value="-Dcatalina.base=${TOMCAT_HOME}" />
+			<jvmarg value="-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager" />
+			<jvmarg value="-Djava.util.logging.config.file=${TOMCAT_HOME}/conf/logging.properties" />
+			<jvmarg value="-Djava.io.tmpdir=${TOMCAT_HOME}/temp" />
+			<jvmarg value="-server" />
+			<jvmarg value="-Dfile.encoding=UTF8" />
+			<jvmarg value="-Xms${JVM_ARG_XMS}" />
+			<jvmarg value="-Xmx${JVM_ARG_XMX}" />
+			<jvmarg value="-XX:PermSize=${JVM_ARG_PERMSIZE}" />
+			<jvmarg value="-Dsystem.properties.final=false" />
+			<jvmarg value="-Duser.timezone=${JVM_ARG_TIMEZONE}" />
+			<jvmarg value="-Djava.security.auth.login.config=${TOMCAT_HOME}/conf/jaas.config" />
+			<arg line="start" />
+		</java>
+	</target>
+	<!-- ================================= 
+          target: stop-server to stop tomcat
+         ================================= -->
+	<target name="stop-server" depends="check-tomcat-ports">
+		<echo>-----------------------------------------------------</echo>
+		<echo>Stopping Tomcat</echo>
+		<echo>-----------------------------------------------------</echo>
+		<fail message="Nothing to stop">
+			<condition>
+				<not>
+					<isset property="tomcat.running" />
+				</not>
+			</condition>
+		</fail>
+		<java classname="org.apache.catalina.startup.Bootstrap" fork="true">
+			<classpath path="${TOMCAT_HOME}/bin/bootstrap.jar:${TOMCAT_HOME}/bin/tomcat-juli.jar" />
+			<jvmarg value="-Dcatalina.home=${TOMCAT_HOME}" />
+			<arg line="stop" />
+		</java>
 	</target>
 </project>

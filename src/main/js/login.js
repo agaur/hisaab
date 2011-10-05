@@ -19,6 +19,6 @@ $(function() {
         }
     });
     $('#FBLogin').click(function(){
-    		window.location = "https://www.facebook.com/dialog/oauth?client_id=108168559291917&redirect_uri=http://localhost:8080/hisaab/home.html&scope=email,publish_stream,manage_friendlists,read_friendlists";
+    		window.location = "https://www.facebook.com/dialog/oauth?client_id=108168559291917&redirect_uri=https://localhost:8443/hisaab/home.html&scope=email,publish_stream,manage_friendlists,read_friendlists&response_type=token";
     });
 });
